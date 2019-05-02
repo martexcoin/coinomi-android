@@ -6,9 +6,9 @@ android {
     defaultConfig {
         applicationId 'com.martexcoin.wallet'
         minSdkVersion 10
-        targetSdkVersion 23
+        targetSdkVersion 26
         versionCode 60
-        versionName 'v2.7.4.1-Valverde'
+        versionName 'v3.0.0.0'
         javaCompileOptions.annotationProcessorOptions.includeCompileClasspath = true
     }
     buildTypes {

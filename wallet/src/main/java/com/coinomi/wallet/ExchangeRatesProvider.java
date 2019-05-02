@@ -105,8 +105,8 @@ public class ExchangeRatesProvider extends ContentProvider {
     private static final String BASE_URL = "https://ticker.coinomi.net/simple";
     //private static final String BASE_URL = "http://18.220.104.50/simple/BRL.html";
     //private static final String BASE_URL_MXT = "https://braziliex.com/api/v1/public/ticker/mxt_brl";
-    //private static final String BASE_URL_MXT = "https://braziliex.com/api/v1/public/ticker/mxt_btc";
-    private static final String BASE_URL_MXT = "https://api.coinmarketcap.com/v1/ticker/martexcoin";
+    private static final String BASE_URL_MXT = "https://braziliex.com/api/v1/public/ticker/mxt_btc";
+    //private static final String BASE_URL_MXT = "https://api.coinmarketcap.com/v1/ticker/martexcoin";
     private static final String TO_LOCAL_URL = BASE_URL + "/to-local/%s";
     //private static final String TO_LOCAL_URL = BASE_URL + "brl";
     private static final String TO_CRYPTO_URL = BASE_URL + "/to-crypto/%s";
@@ -346,8 +346,8 @@ public class ExchangeRatesProvider extends ContentProvider {
                         System.currentTimeMillis() - start);
 
                 JSONObject coinomiJsonObject = new JSONObject(response.body().string());
-                //JSONObject mxtJsonObject =  requestExchangeRatesJsonBraziliex(new URL(BASE_URL_MXT));
-                JSONObject mxtJsonObject =  requestExchangeRatesJsonCMC(new URL(BASE_URL_MXT));
+                JSONObject mxtJsonObject =  requestExchangeRatesJsonBraziliex(new URL(BASE_URL_MXT));
+                //JSONObject mxtJsonObject =  requestExchangeRatesJsonCMC(new URL(BASE_URL_MXT));
                 JSONObject returnJsonObject = new JSONObject();
                 JSONObject[] objs = new JSONObject[] { coinomiJsonObject, mxtJsonObject };
                 for (JSONObject obj : objs) {
@@ -395,41 +395,6 @@ public class ExchangeRatesProvider extends ContentProvider {
         } catch (JSONException e) {
             log.warn("Could Braziliex not parse exchange rates JSON: {}", e.getMessage());
         }
-        return null;
-    }
-
-    private JSONObject requestExchangeRatesJsonCMC(final URL url) {
-        String price = "???";
-        Double db_price = null;
-        // Return null if no connection
-        final NetworkInfo activeInfo = connManager.getActiveNetworkInfo();
-        if (activeInfo == null || !activeInfo.isConnected()) return null;
-
-        final long start = System.currentTimeMillis();
-
-        OkHttpClient client = NetworkUtils.getHttpClient(getContext().getApplicationContext());
-        Request request = new Request.Builder().url(url).build();
-
-        try {
-            Response response = client.newCall(request).execute();
-            if (response.isSuccessful()) {
-                log.info("fetched exchange CoinMarketCap rates from {}, took {} ms", url,
-                        System.currentTimeMillis() - start);
-                JSONArray array = (JSONArray) new JSONTokener(response).nextValue();
-                JSONObject object = array.getJSONObject(0);
-                db_price = object.getDouble("price_usd");
-                price = String.format("%.3f", db_price);
-                return new JSONObject(response.body().string().replace(price, "MXT"));
-            } else {
-                log.warn("Error CoinMarketCap HTTP code '{}' when fetching exchange rates from {}",
-                        response.code(), url);
-            }
-        } catch (IOException e) {
-            log.warn("Error CoinMarketCap '{}' when fetching exchange rates from {}", e.getMessage(), url);
-        } catch (JSONException e) {
-            log.warn("Could CoinMarketCap not parse exchange rates JSON: {}", e.getMessage());
-        }
-
         return null;
     }
 
